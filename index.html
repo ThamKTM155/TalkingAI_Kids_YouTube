@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Talking AI Kids</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#cceeff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.app{
+  background:white;
+  width:360px;
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
+}
+#avatar{
+  font-size:80px;
+}
+#bubble{
+  background:#eef;
+  padding:15px;
+  border-radius:15px;
+  margin:15px 0;
+}
+#micBtn{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  font-size:24px;
+}
+body.sleep {
+  background: radial-gradient(circle at top, #1b2735, #090a0f);
+}
+
+.app.sleep {
+  background: transparent;
+  box-shadow: none;
+}
+
+.moon {
+  position: fixed;
+  top: 40px;
+  right: 40px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, #fff, #ddd);
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+.stars {
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+    radial-gradient(2px 2px at 70% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 50% 60%, #fff, transparent);
+  opacity: 0.6;
+}
+button {
+  pointer-events: none;
+}
+
+</style>
+</head>
+
+<body>
+<div class="stars"></div>
+<div class="moon"></div>
+
+<div class="app">
+  <div id="avatar">🤖</div>
+  <div id="bubble">Bấm nút để bắt đầu nhé!</div>
+
+  <button id="micBtn" style="display:none;">🎤 NÓI</button>
+<br><br>
+<button id="storyBtn">📖 KỂ CHUYỆN NGỦ</button>
+
+  <audio id="bgm" loop>
+    <source src="kids-music.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
