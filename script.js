@@ -1,187 +1,150 @@
 // =======================
 // DOM
 // =======================
-const bubble = document.getElementById("bubble");
-const micBtn = document.getElementById("micBtn");
-const storyBtn = document.getElementById("storyBtn");
-const bgm = document.getElementById("bgm");
-const app = document.querySelector(".app");
+const startBtn = document.getElementById("startBtn");
+const bubble   = document.getElementById("bubble");
+const bgm      = document.getElementById("bgm");
+const ting     = document.getElementById("tingSound");
+const btn15    = document.getElementById("timer15");
+const btn30    = document.getElementById("timer30");
+const btn60    = document.getElementById("timer60");
+
+let storyIndex = 0;
+let storyTimer = null;
+let stopTimer  = null;
 
 // =======================
 // TTS
 // =======================
 function speak(text) {
   if (!window.speechSynthesis) return;
-  speechSynthesis.cancel();
 
+  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "vi-VN";
-  u.rate = 0.7;
-  u.pitch = 0.95;
+  u.rate = 0.75;
+  u.pitch = 1;
   speechSynthesis.speak(u);
 }
 
 // =======================
-// SPEECH TO TEXT (MIC)
-// =======================
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-const recog = new SpeechRecognition();
-recog.lang = "vi-VN";
-
-micBtn.onclick = () => {
-  bubble.innerHTML = "Cô đang nghe nè 👂";
-  recog.start();
-};
-
-recog.onresult = (e) => {
-  const text = e.results[0][0].transcript;
-  bubble.innerHTML = "Bé nói: " + text;
-  speak("Con nói hay lắm");
-};
-
-// =======================
-// TRUYỆN NGỦ
+// TRUYỆN NGỦ (ĐÃ SỬA CHUẨN)
 // =======================
 const sleepStories = [
-`Ngày xửa ngày xưa, có một chú mèo nhỏ.
-Mèo cuộn tròn trong chiếc giường êm.
-Ánh trăng chiếu nhẹ qua cửa sổ.
-Mèo ngủ thật ngon...`,
+`Con yêu à…
+Bây giờ là lúc cả khu rừng chuẩn bị đi ngủ…
+Gió thổi rất nhẹ…
+Và chúng ta cùng nghe một câu chuyện thật êm nhé…`,
 
-`Trong khu rừng yên tĩnh,
-chú gấu con nằm nghe gió thổi.
-Lá cây khẽ lay.
-Gấu từ từ chìm vào giấc ngủ...`,
+`Ngày xưa…
+Trong một khu rừng xanh mát…
+Có một chú gấu nhỏ rất hiền…`,
 
-`Có một chú thỏ nhỏ tên là Mít.
-Buổi tối, gió thổi mát rượi.
-Mít cuộn mình trong tổ.
-Giấc ngủ đến thật êm...`,
+`Buổi tối hôm ấy…
+Chú gấu đi dạo thật chậm…
+Nghe tiếng lá rơi khe khẽ…
+Nghe tiếng suối thì thầm rất nhỏ…`,
 
-`Bầu trời đầy sao lấp lánh.
-Không gian yên bình.
-Bé nhắm mắt lại.
-Ngủ thật sâu và ngon nhé...`
+`Chú gặp bạn thỏ…
+Thỏ đang cuộn mình ngủ dưới gốc cây…
+Chú gặp chim con…
+Chim đã rúc đầu vào cánh…`,
+
+`Gấu nhỏ ngồi xuống…
+Thở thật đều…
+Cảm nhận khu rừng yên bình…`,
+
+`Rồi gấu nhắm mắt…
+Ngủ thật ngon…
+Trong giấc mơ dịu dàng…`,
+
+`Và bây giờ…
+Con yêu cũng hãy nhắm mắt lại nhé…
+Ngủ thật ngoan…
+Chúc con ngủ ngon…`
 ];
 
-async function tellSleepStory(text) {
-  const parts = text.split(/\n+/).filter(p => p.trim());
+// =======================
+// KỂ TRUYỆN TUẦN TỰ
+// =======================
+function playNextStory() {
+  const text = sleepStories[storyIndex];
+  bubble.innerText = text;
+  speak(text);
 
-async function startSleepPlaylist() {
-  while (true) {
-    const story =
-      sleepStories[Math.floor(Math.random() * sleepStories.length)];
-
-    await tellSleepStory(story);
-
-    // nghỉ giữa các truyện
-    await new Promise(r => setTimeout(r, 10000));
-  }
-}
-
-  for (const part of parts) {
-    bubble.innerHTML = part;
-    speak(part);
-    await new Promise(r => setTimeout(r, part.length * 90 + 1200));
-  }
+  storyIndex++;
+  if (storyIndex >= sleepStories.length) storyIndex = 0;
 }
 
 // =======================
-// HẸN GIỜ TẮT NHẠC
+// BẮT ĐẦU KỂ
 // =======================
-function startSleepTimer(minutes = 30) {
-  if (!bgm) return;
-
-  console.log("⏰ Hẹn giờ tắt nhạc:", minutes, "phút");
-
-  setTimeout(() => {
-    let vol = bgm.volume;
-    const fade = setInterval(() => {
-      vol -= 0.01;
-      if (vol <= 0) {
-        bgm.pause();
-        bgm.currentTime = 0;
-        clearInterval(fade);
-      } else {
-        bgm.volume = vol;
-      }
-    }, 500);
-  }, minutes * 60 * 1000);
+function startStories() {
+  playNextStory();
+  storyTimer = setInterval(playNextStory, 20000);
 }
 
 // =======================
-// NÚT KỂ CHUYỆN NGỦ
+// DỪNG TẤT CẢ
 // =======================
-storyBtn.onclick = () => {
-  document.body.classList.add("sleep");
-  app.classList.add("sleep");
-
-  bgm.volume = 0.08;
-  bgm.play().catch(() => {});
-
-  startSleepTimer(15);
-
-  const story =
-    sleepStories[Math.floor(Math.random() * sleepStories.length)];
-
-  bubble.innerHTML = "🌙 Cô bắt đầu kể chuyện cho bé ngủ nha";
-  speak("Cô bắt đầu kể chuyện cho bé ngủ nha");
-
-  setTimeout(() => tellSleepStory(story), 1500);
-};
-async function startSleepPlaylist() {
-  while (true) {
-    const story =
-      sleepStories[Math.floor(Math.random() * sleepStories.length)];
-
-    await tellSleepStory(story);
-
-    // nghỉ giữa các truyện 10 giây
-    await new Promise(r => setTimeout(r, 10000));
-  }
+function stopAll() {
+  clearInterval(storyTimer);
+  clearTimeout(stopTimer);
+  speechSynthesis.cancel();
+  if (bgm) bgm.pause();
+  bubble.innerText = "Chúc bé ngủ ngon 🌙";
 }
 
 // =======================
-// AUTO MODE – YOUTUBE KIDS
+// HẸN GIỜ TẮT
 // =======================
-function startYouTubeMode() {
-  console.log("📺 YouTube Kids mode ON");
+function setSleepTimer(minutes) {
+  clearTimeout(stopTimer);
+  stopTimer = setTimeout(stopAll, minutes * 60 * 1000);
+  console.log("⏰ Hẹn giờ:", minutes, "phút");
+}
 
-  document.body.classList.add("sleep");
-  app.classList.add("sleep");
+// =======================
+// START BUTTON
+// =======================
+startBtn.onclick = () => {
+  console.log("▶ START");
 
+  startBtn.style.display = "none";
+
+  // 🎵 Nhạc nền
   if (bgm) {
-    bgm.volume = 0.1;
-    bgm.play().catch(() => {});
+    bgm.volume = 0.15;
+    bgm.loop = true;
+    bgm.play().catch(err => {
+      console.log("BGM autoplay blocked – OK");
+    });
   }
 
+  // 🔔 Ting
+  if (ting) {
+    ting.volume = 0.5;
+    ting.play().catch(err => {
+      console.log("Ting autoplay blocked – OK");
+    });
+  }
+
+  // 🗣️ Lời chào
   setTimeout(() => {
-    if (bgm) bgm.volume = 0.05;
-    speak("Xin chào các bé yêu. Bây giờ mình cùng nghe kể chuyện và ngủ ngon nhé.");
+    speak("Xin chào các bé yêu. Bây giờ mình cùng nghe truyện và ngủ ngon nhé.");
   }, 800);
 
+  // 📖 Bắt đầu kể truyện
   setTimeout(() => {
-    startSleepPlaylist();
-  }, 3500);
+    startStories();
+  }, 3000);
+};
 
-  startSleepTimer(30);
-}
-
- // =======================
-// AUTO START (CẦN 1 CLICK)
 // =======================
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("📺 YouTube Kids mode READY");
+// NÚT HẸN GIỜ
+// =======================
+if (btn15) btn15.onclick = () => setSleepTimer(15);
+if (btn30) btn30.onclick = () => setSleepTimer(30);
+if (btn60) btn60.onclick = () => setSleepTimer(60);
 
-  document.body.addEventListener(
-    "click",
-    () => {
-      startYouTubeMode();
-    },
-    { once: true }
-  );
-});
-
-console.log("✅ Talking AI Kids READY");
+console.log("✅ Talking AI Kids READY – STABLE MODE");
